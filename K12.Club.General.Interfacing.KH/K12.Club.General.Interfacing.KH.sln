@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "K12.Club.General.Interfacing.KH", "K12.Club.General.Interfacing.KH\K12.Club.General.Interfacing.KH.csproj", "{DC1612F2-12BC-42DA-A083-6E621F3008F6}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 2
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://10.1.1.204:8080/tfs/tfs2008
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = K12.Club.General.Interfacing.KH\\K12.Club.General.Interfacing.KH.csproj
+		SccProjectName1 = K12.Club.General.Interfacing.KH
+		SccLocalPath1 = K12.Club.General.Interfacing.KH
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DC1612F2-12BC-42DA-A083-6E621F3008F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC1612F2-12BC-42DA-A083-6E621F3008F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC1612F2-12BC-42DA-A083-6E621F3008F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC1612F2-12BC-42DA-A083-6E621F3008F6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
