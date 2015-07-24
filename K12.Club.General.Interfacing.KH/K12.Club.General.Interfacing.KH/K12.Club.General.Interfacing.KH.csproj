@@ -40,6 +40,11 @@
       <HintPath>Library\Aspose.Cells.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Campus.IRewrite.Interface, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Library\Campus.IRewrite.Interface.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="DevComponents.DotNetBar2, Version=9.5.0.1, Culture=neutral, PublicKeyToken=7eb7c3a35b91de04, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Library\DevComponents.DotNetBar2.dll</HintPath>
@@ -89,7 +94,7 @@
       <HintPath>Library\JHSchool.Data.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="K12.Club.General, Version=1.0.2.1, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="K12.Club.General, Version=1.0.2.7, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Library\K12.Club.General.dll</HintPath>
       <Private>False</Private>
@@ -115,6 +120,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cadre\ClassCadreNameObj.cs" />
+    <Compile Include="Cadre\SchoolObject.cs" />
     <Compile Include="DetailContentBase.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -146,6 +153,7 @@
     <Compile Include="UDT\一名學生.cs" />
     <Compile Include="UDT\成績取得器.cs" />
     <Compile Include="UDT\社團幹部obj.cs" />
+    <Compile Include="學期結算\Clearing.cs" />
     <Compile Include="學期結算\ClearingForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -172,6 +180,8 @@
   <ItemGroup>
     <Content Include="Library\Aspose.Cells.dll" />
     <Content Include="Library\Aspose.Cells.xml" />
+    <Content Include="Library\Campus.IRewrite.Interface.dll" />
+    <Content Include="Library\Campus.IRewrite.Interface.pdb" />
     <Content Include="Library\DevComponents.DotNetBar2.dll" />
     <Content Include="Library\FISCA.Data.dll" />
     <Content Include="Library\FISCA.Data.pdb" />

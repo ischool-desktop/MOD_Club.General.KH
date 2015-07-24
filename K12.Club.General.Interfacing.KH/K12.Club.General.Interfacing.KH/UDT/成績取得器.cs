@@ -147,7 +147,7 @@ namespace K12.Club.General.Interfacing.KH
         }
 
         /// <summary>
-        /// 由課程清單取得成績
+        /// 由社團清單取得成績
         /// </summary>
         public void GetSCJoinByClubIDList(List<string> ClubList)
         {

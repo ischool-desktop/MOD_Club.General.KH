@@ -30,6 +30,9 @@ namespace K12.Club.General.Interfacing.KH
 
         List<ResultScoreRecord> UPDateScoreList { get; set; }
 
+        Dictionary<string, SchoolObject> StudentCadreDic { get; set; }
+        Dictionary<string, ClassCadreNameObj> CadreConfigDic { get; set; }
+
         string _SchoolYear { get; set; }
         string _Semester { get; set; }
 
@@ -63,6 +66,11 @@ namespace K12.Club.General.Interfacing.KH
             //用背景模式進行資料檢查
             List<string> Check_List = new List<string>();
             List<CLUBRecord> ClubList = _AccessHelper.Select<CLUBRecord>(ClubAdmin.Instance.SelectedSource);
+
+            //學生原有幹部記錄
+            StudentCadreDic = new Dictionary<string, SchoolObject>();
+            CadreConfigDic = new Dictionary<string, ClassCadreNameObj>();
+
             foreach (CLUBRecord each in ClubList)
             {
                 string meg = each.SchoolYear.ToString() + each.Semester.ToString();
@@ -91,6 +99,42 @@ namespace K12.Club.General.Interfacing.KH
 
                 //社團ID : 社團幹部obj
                 Dictionary<string, 社團幹部obj> CadreDic = new Dictionary<string, 社團幹部obj>();
+
+                #region 處理[幹部系統]幹部記錄
+
+                //是否有社團幹部之設定檔
+                List<ClassCadreNameObj> CadreSetupList = _AccessHelper.Select<ClassCadreNameObj>("NameType = '社團幹部'");
+
+                if (CadreSetupList.Count > 0)
+                {
+                    foreach (ClassCadreNameObj each in CadreSetupList)
+                    {
+                        if (!CadreConfigDic.ContainsKey(each.CadreName))
+                        {
+                            CadreConfigDic.Add(each.CadreName, each);
+                        }
+                    }
+
+                    //條件
+                    //1.當學年/學期之幹部記錄
+                    //2.社團幹部
+                    //3.設定檔內相同之名稱
+                    //4.學生ID清單
+                    if (tool._StudentDic.Keys.Count > 0)
+                    {
+                        List<SchoolObject> CadreList = _AccessHelper.Select<SchoolObject>(string.Format("ReferenceType = '{0}' and SchoolYear = '{1}' and Semester = '{2}' and CadreName in ('{3}') and StudentID in ('{4}')", "社團幹部", _SchoolYear, _Semester, string.Join("','", CadreConfigDic.Keys), string.Join("','", tool._StudentDic.Keys)));
+
+                        foreach (SchoolObject each in CadreList)
+                        {
+                            if (!StudentCadreDic.ContainsKey(each.StudentID))
+                            {
+                                StudentCadreDic.Add(each.StudentID, each);
+                            }
+                        }
+                    }
+                }
+
+                #endregion
 
                 #region 處理幹部記錄
 
@@ -140,7 +184,9 @@ namespace K12.Club.General.Interfacing.KH
                     }
                 }
 
-                //_AccessHelper.DeletedValues(ResultList);
+                //幹部系統問題處理
+                List<SchoolObject> InsertsoList = new List<SchoolObject>();
+                List<SchoolObject> UpdatesoList = new List<SchoolObject>();
 
                 foreach (List<SCJoin> scjList in tool._SCJoinDic.Values)
                 {
@@ -187,6 +233,70 @@ namespace K12.Club.General.Interfacing.KH
                                     if (CadreDic[cr.UID]._Cadre1.ContainsKey(sr.ID))
                                     {
                                         update_rsr.CadreName = CadreDic[cr.UID]._Cadre1[sr.ID]; //幹部
+
+                                        #region 幹部模組問題處理
+
+                                        if (StudentCadreDic.ContainsKey(sr.ID))
+                                        {
+                                            //社團名稱不同
+                                            if (StudentCadreDic[sr.ID].Text != update_rsr.ClubName)
+                                            {
+                                                //幹部記錄之社團名稱不同
+                                                //因此需要新增幹部記錄
+
+                                                SchoolObject so = new SchoolObject();
+                                                so.CadreName = update_rsr.CadreName;
+                                                so.ReferenceType = "社團幹部";
+                                                so.SchoolYear = _SchoolYear;
+                                                so.Semester = _Semester;
+                                                so.StudentID = sr.ID;
+                                                so.Text = cr.ClubName;
+
+                                                if (CadreConfigDic.ContainsKey(update_rsr.CadreName))
+                                                    so.Ratio_Order = CadreConfigDic[update_rsr.CadreName].Ratio_Order;
+
+                                                InsertsoList.Add(so);
+
+                                            }
+                                            else
+                                            {
+                                                //表示學生之幹部名稱不一樣
+                                                //因此需要修正幹部記錄
+                                                //幹部記錄之社團名稱不同
+                                                if (StudentCadreDic[sr.ID].CadreName != update_rsr.CadreName)
+                                                {
+                                                    StudentCadreDic[sr.ID].CadreName = update_rsr.CadreName;
+                                                    if (CadreConfigDic.ContainsKey(update_rsr.CadreName))
+                                                        StudentCadreDic[sr.ID].Ratio_Order = CadreConfigDic[update_rsr.CadreName].Ratio_Order;
+                                                    UpdatesoList.Add(StudentCadreDic[sr.ID]);
+                                                }
+                                                else
+                                                {
+                                                    //幹部名稱相同,不予處理
+                                                    //但是修正比序狀態
+                                                    if (CadreConfigDic.ContainsKey(update_rsr.CadreName))
+                                                        StudentCadreDic[sr.ID].Ratio_Order = CadreConfigDic[update_rsr.CadreName].Ratio_Order;
+                                                    UpdatesoList.Add(StudentCadreDic[sr.ID]);
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            SchoolObject so = new SchoolObject();
+                                            so.CadreName = update_rsr.CadreName;
+                                            so.ReferenceType = "社團幹部";
+                                            so.SchoolYear = _SchoolYear;
+                                            so.Semester = _Semester;
+                                            so.StudentID = sr.ID;
+                                            so.Text = cr.ClubName;
+
+                                            if (CadreConfigDic.ContainsKey(update_rsr.CadreName))
+                                                so.Ratio_Order = CadreConfigDic[update_rsr.CadreName].Ratio_Order;
+
+                                            InsertsoList.Add(so);
+                                        }
+
+                                        #endregion
                                     }
                                     else
                                     {
@@ -238,6 +348,66 @@ namespace K12.Club.General.Interfacing.KH
                                     {
                                         check = true;
                                         rsr.CadreName = CadreDic[cr.UID]._Cadre1[sr.ID];
+
+                                        #region 幹部模組問題處理
+
+                                        if (StudentCadreDic.ContainsKey(sr.ID))
+                                        {
+                                            //社團名稱不同
+                                            if (StudentCadreDic[sr.ID].Text != rsr.ClubName)
+                                            {
+                                                SchoolObject so = new SchoolObject();
+                                                so.CadreName = rsr.CadreName;
+                                                so.ReferenceType = "社團幹部";
+                                                so.SchoolYear = _SchoolYear;
+                                                so.Semester = _Semester;
+                                                so.StudentID = sr.ID;
+                                                so.Text = cr.ClubName;
+
+                                                if (CadreConfigDic.ContainsKey(rsr.CadreName))
+                                                    so.Ratio_Order = CadreConfigDic[rsr.CadreName].Ratio_Order;
+
+                                                InsertsoList.Add(so);
+                                            }
+                                            else
+                                            {
+                                                //表示學生之幹部名稱不一樣
+                                                //因此需要修正幹部記錄
+                                                //幹部記錄之社團名稱不同
+                                                if (StudentCadreDic[sr.ID].CadreName != rsr.CadreName)
+                                                {
+                                                    StudentCadreDic[sr.ID].CadreName = rsr.CadreName;
+
+                                                    if (CadreConfigDic.ContainsKey(rsr.CadreName))
+                                                        StudentCadreDic[sr.ID].Ratio_Order = CadreConfigDic[rsr.CadreName].Ratio_Order;
+                                                    UpdatesoList.Add(StudentCadreDic[sr.ID]);
+                                                }
+                                                else
+                                                {
+                                                    //幹部名稱相同,不予處理
+                                                    //但是修正比序狀態
+                                                    if (CadreConfigDic.ContainsKey(rsr.CadreName))
+                                                        StudentCadreDic[sr.ID].Ratio_Order = CadreConfigDic[rsr.CadreName].Ratio_Order;
+                                                    UpdatesoList.Add(StudentCadreDic[sr.ID]);
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            SchoolObject so = new SchoolObject();
+                                            so.CadreName = rsr.CadreName;
+                                            so.ReferenceType = "社團幹部";
+                                            so.SchoolYear = _SchoolYear;
+                                            so.Semester = _Semester;
+                                            so.StudentID = sr.ID;
+                                            so.Text = cr.ClubName;
+                                            if (CadreConfigDic.ContainsKey(rsr.CadreName))
+                                                so.Ratio_Order = CadreConfigDic[rsr.CadreName].Ratio_Order;
+
+                                            InsertsoList.Add(so);
+                                        }
+
+                                        #endregion
                                     }
                                     else
                                     {
@@ -258,6 +428,10 @@ namespace K12.Club.General.Interfacing.KH
 
                 try
                 {
+                    //幹部
+                    _AccessHelper.InsertValues(InsertsoList);
+                    _AccessHelper.UpdateValues(UpdatesoList);
+
                     _AccessHelper.InsertValues(InsertScoreList);
                     _AccessHelper.UpdateValues(UPDateScoreList);
                 }
